@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>drive.file 폴더 권한 프로브</title>
+<style>
+:root { color-scheme: light dark; --fg:#1a1a1a; --muted:#5c5c5c; --bg:#fdfdfc;
+        --line:#e0ddd6; --ok:#1a7f37; --bad:#b3261e; --card:#f6f4ef; }
+@media (prefers-color-scheme: dark) {
+  :root { --fg:#e8e6e1; --muted:#a8a49c; --bg:#16150f; --line:#33302a;
+          --ok:#57c96a; --bad:#ff6b5e; --card:#1f1d16; }
+}
+* { box-sizing: border-box; }
+body { margin:0; padding:24px 16px 96px; background:var(--bg); color:var(--fg);
+       font: 15px/1.7 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif;
+       word-break: keep-all; }
+main { max-width: 52rem; margin: 0 auto; }
+h1 { font-size:1.4rem; margin:0 0 .25rem; }
+h2 { font-size:1.05rem; margin:2rem 0 .5rem; padding-top:1rem; border-top:1px solid var(--line); }
+p.sub { color:var(--muted); margin:0 0 1.5rem; }
+label { display:block; font-size:.85rem; color:var(--muted); margin:.6rem 0 .2rem; }
+input[type=text] { width:100%; padding:8px 10px; font:13px ui-monospace, SFMono-Regular, Menlo, monospace;
+       background:var(--card); color:var(--fg); border:1px solid var(--line); border-radius:6px; }
+button { font:inherit; font-weight:600; padding:9px 16px; margin:.35rem .35rem .35rem 0;
+       background:var(--fg); color:var(--bg); border:0; border-radius:8px; cursor:pointer; }
+button:disabled { opacity:.35; cursor:default; }
+button.ghost { background:transparent; color:var(--fg); border:1px solid var(--line); }
+#log { background:var(--card); border:1px solid var(--line); border-radius:8px;
+       padding:12px 14px; font:12.5px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace;
+       white-space:pre-wrap; overflow-x:auto; min-height:6rem; }
+.ok { color:var(--ok); font-weight:700; }
+.bad { color:var(--bad); font-weight:700; }
+.verdict { border:2px solid var(--line); border-radius:10px; padding:14px 16px; margin-top:1rem; }
+ol { padding-left:1.2rem; }
+code { background:var(--card); padding:1px 5px; border-radius:4px; font-size:.9em; }
+</style>
+</head>
+<body>
+<main>
+
+<h1>drive.file 폴더 권한 프로브</h1>
+<p class="sub">피커에서 <strong>폴더</strong>를 고르면 그 <strong>하위 파일</strong>과
+<strong>고른 뒤에 추가되는 파일</strong>까지 접근되는가 — 구글 문서에 답이 없어서 직접 잰다.
+이 답에 따라 Readmon의 Google Drive 연동 설계가 갈린다.</p>
+
+<h2>0. 준비물</h2>
+<p>Google Cloud Console에서 <strong>웹 애플리케이션</strong> OAuth 클라이언트와 API 키를 만든다.
+iOS 클라이언트로는 브라우저 JS가 동작하지 않는다.</p>
+<ol>
+<li><strong>클라이언트 ▸ 클라이언트 만들기 ▸ 웹 애플리케이션</strong>.
+    <strong>승인된 JavaScript 출처</strong>에 이 페이지의 출처를 넣는다:
+    <code id="origin">…</code></li>
+<li><strong>사용자 인증 정보 ▸ API 키</strong>를 하나 만든다. (Picker API가 이 키를 요구한다)</li>
+<li><strong>API 및 서비스 ▸ 라이브러리</strong>에서 <code>Google Picker API</code>와
+    <code>Google Drive API</code>를 사용 설정한다.</li>
+<li>프로젝트 번호는 <strong>Cloud Console 대시보드</strong>에 있다(숫자만).</li>
+</ol>
+
+<label>웹 클라이언트 ID</label>
+<input type="text" id="clientId" placeholder="000000000000-xxxxxxxx.apps.googleusercontent.com" autocomplete="off">
+<label>API 키</label>
+<input type="text" id="apiKey" placeholder="AIza..." autocomplete="off">
+<label>프로젝트 번호 (App ID)</label>
+<input type="text" id="appId" placeholder="000000000000" autocomplete="off">
+<p style="color:var(--muted);font-size:.8rem">이 값들은 이 브라우저에만 저장된다(localStorage).
+서버로 전송되지 않는다.</p>
+
+<h2>1. 로그인 — drive.file 하나만 요청한다</h2>
+<button id="btnAuth">Google 로그인</button>
+<button class="ghost" id="btnReset">저장값 지우기</button>
+
+<h2>2. 폴더 고르기</h2>
+<p class="sub" style="margin:0 0 .5rem">책이 여러 개 든 폴더를 고를 것. 하위 폴더가 있으면 더 좋다.</p>
+<button id="btnPick" disabled>피커 열기</button>
+
+<h2>3. 하위를 볼 수 있는가</h2>
+<button id="btnList" disabled>고른 폴더의 하위 조회</button>
+<button class="ghost" id="btnDeep" disabled>하위 폴더 안까지 조회</button>
+
+<h2>4. 고른 뒤에 추가한 파일도 보이는가</h2>
+<p class="sub" style="margin:0 0 .5rem"><strong>이 단계가 핵심이다.</strong>
+Drive 웹에서 그 폴더에 파일을 하나 올린 뒤 아래를 누른다.</p>
+<button id="btnRelist" disabled>다시 조회</button>
+
+<h2>기록</h2>
+<div id="log">준비되면 0번부터 채우세요.</div>
+<div class="verdict" id="verdict" style="display:none"></div>
+
+</main>
+
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://apis.google.com/js/api.js" async defer></script>
+<script>
+const $ = id => document.getElementById(id);
+const KEYS = ['clientId','apiKey','appId'];
+let token = null, picked = null, firstCount = null, pickerReady = false;
+
+$('origin').textContent = location.origin;
+
+// 입력값은 이 브라우저에만 둔다.
+KEYS.forEach(k => {
+  const el = $(k);
+  el.value = localStorage.getItem('probe.'+k) || '';
+  el.addEventListener('input', () => localStorage.setItem('probe.'+k, el.value.trim()));
+});
+$('btnReset').onclick = () => { KEYS.forEach(k => { localStorage.removeItem('probe.'+k); $(k).value=''; }); log('저장값을 지웠다.'); };
+
+function log(msg, cls) {
+  const t = new Date().toTimeString().slice(0,8);
+  const line = cls ? `<span class="${cls}">${msg}</span>` : msg;
+  $('log').innerHTML += (($('log').innerHTML.startsWith('준비되면')) ? '' : '\n') + `[${t}] ${line}`;
+  if ($('log').innerHTML.startsWith('준비되면')) $('log').innerHTML = `[${t}] ${line}`;
+  $('log').scrollTop = $('log').scrollHeight;
+}
+
+function verdict(html, good) {
+  const v = $('verdict');
+  v.style.display = 'block';
+  v.style.borderColor = good ? 'var(--ok)' : 'var(--bad)';
+  v.innerHTML = html;
+}
+
+function need() {
+  const v = Object.fromEntries(KEYS.map(k => [k, $(k).value.trim()]));
+  if (!v.clientId || !v.apiKey || !v.appId) { log('0번의 세 값을 다 채워야 한다.', 'bad'); return null; }
+  return v;
+}
+
+$('btnAuth').onclick = () => {
+  const v = need(); if (!v) return;
+  if (!window.google || !google.accounts) { log('구글 스크립트가 아직 안 떴다. 잠시 뒤 다시.', 'bad'); return; }
+  const client = google.accounts.oauth2.initTokenClient({
+    client_id: v.clientId,
+    // 딱 하나만 요청한다 — 이것이 프로브의 전제다.
+    scope: 'https://www.googleapis.com/auth/drive.file',
+    callback: (resp) => {
+      if (resp.error) { log('로그인 실패: ' + resp.error, 'bad'); return; }
+      token = resp.access_token;
+      log('로그인 성공. 부여된 범위: ' + (resp.scope || '(응답에 없음)'), 'ok');
+      gapi.load('picker', () => { pickerReady = true; $('btnPick').disabled = false; log('피커 준비됨.'); });
+    },
+  });
+  client.requestAccessToken();
+};
+
+$('btnPick').onclick = () => {
+  const v = need(); if (!v || !token || !pickerReady) return;
+  const view = new google.picker.DocsView(google.picker.ViewId.FOLDERS)
+    .setIncludeFolders(true)
+    .setSelectFolderEnabled(true)
+    .setMimeTypes('application/vnd.google-apps.folder');
+  new google.picker.PickerBuilder()
+    .setAppId(v.appId)
+    .setOAuthToken(token)
+    .setDeveloperKey(v.apiKey)
+    .addView(view)
+    .setCallback((data) => {
+      if (data.action !== google.picker.Action.PICKED) return;
+      const doc = data.docs[0];
+      picked = { id: doc.id, name: doc.name, mimeType: doc.mimeType };
+      log(`폴더 선택: ${doc.name}  (id=${doc.id})`, 'ok');
+      log(`  mimeType=${doc.mimeType}`);
+      $('btnList').disabled = false; $('btnDeep').disabled = false; $('btnRelist').disabled = false;
+    })
+    .build().setVisible(true);
+};
+
+async function driveList(folderId, label) {
+  const url = 'https://www.googleapis.com/drive/v3/files'
+    + '?q=' + encodeURIComponent(`'${folderId}' in parents and trashed=false`)
+    + '&fields=' + encodeURIComponent('files(id,name,mimeType,size,modifiedTime)')
+    + '&pageSize=100';
+  const res = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
+  const body = await res.json();
+  if (!res.ok) {
+    log(`${label} 실패 HTTP ${res.status}: ${JSON.stringify(body.error && body.error.message)}`, 'bad');
+    return null;
+  }
+  return body.files || [];
+}
+
+$('btnList').onclick = async () => {
+  if (!picked) return;
+  log(`— '${picked.name}' 하위 조회 —`);
+  const files = await driveList(picked.id, '하위 조회');
+  if (files === null) {
+    verdict('<strong class="bad">하위 조회 자체가 실패했다.</strong> 폴더를 골라도 그 안을 나열할 수 없다는 뜻이라면, drive.file + 피커 설계는 성립하지 않는다.', false);
+    return;
+  }
+  firstCount = files.length;
+  log(`${files.length}개 보임`, files.length ? 'ok' : 'bad');
+  files.slice(0, 30).forEach(f => log(`  · ${f.name}  [${f.mimeType.replace('application/vnd.google-apps.','gapps/')}]`));
+  if (files.length > 30) log(`  … 외 ${files.length - 30}개`);
+  if (files.length === 0) {
+    verdict('<strong class="bad">폴더는 골랐는데 하위가 0개다.</strong> 폴더 자체에만 권한이 붙고 내용물에는 안 붙는다는 신호다. 폴더가 정말 비어 있는 것은 아닌지 먼저 확인할 것.', false);
+  } else {
+    verdict('<strong class="ok">하위가 보인다.</strong> 폴더 선택이 내용물까지 덮는다. 남은 것은 4번 — 고른 뒤에 추가한 파일도 보이는가.', true);
+  }
+};
+
+$('btnDeep').onclick = async () => {
+  if (!picked) return;
+  const files = await driveList(picked.id, '깊이 조회');
+  if (!files) return;
+  const sub = files.find(f => f.mimeType === 'application/vnd.google-apps.folder');
+  if (!sub) { log('하위 폴더가 없어 깊이를 못 잰다. 하위 폴더가 있는 폴더로 다시 해 볼 것.', 'bad'); return; }
+  log(`— 하위 폴더 '${sub.name}' 안을 조회 —`);
+  const inner = await driveList(sub.id, '깊이 조회');
+  if (inner === null) {
+    log('한 단계 아래는 못 본다 — 권한이 한 겹만 내려간다.', 'bad');
+  } else {
+    log(`${inner.length}개 보임 — 재귀적으로 내려간다.`, inner.length ? 'ok' : null);
+    inner.slice(0, 10).forEach(f => log(`  · ${f.name}`));
+  }
+};
+
+$('btnRelist').onclick = async () => {
+  if (!picked) return;
+  const files = await driveList(picked.id, '재조회');
+  if (files === null) return;
+  log(`재조회: ${files.length}개 (처음 ${firstCount === null ? '?' : firstCount}개)`);
+  if (firstCount === null) { log('3번을 먼저 눌러 기준값을 만들 것.', 'bad'); return; }
+  if (files.length > firstCount) {
+    verdict('<strong class="ok">새로 추가한 파일이 보인다.</strong> 폴더 단위 권한이 이후 파일까지 덮는다 — <strong>웹소설 리더에 쓸 수 있다.</strong> drive.file + 피커 설계가 성립한다.', true);
+  } else {
+    verdict('<strong class="bad">개수가 안 늘었다.</strong> 파일을 정말 추가했다면, 폴더 권한이 <strong>선택 시점의 항목</strong>에만 붙는다는 뜻이다. 회차마다 다시 골라야 하므로 이 설계는 무너진다. (동기화 지연일 수 있으니 30초 뒤 한 번 더 눌러 볼 것)', false);
+  }
+};
+</script>
+</body>
+</html>
