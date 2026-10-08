@@ -1,18 +1,224 @@
 <!doctype html>
-<html lang="ko">
+<html lang="ko" data-lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>fogblue</title>
-<style>
-:root { color-scheme: light dark; }
-body { margin:0; padding:96px 20px; font-size:16px; line-height:1.75;
-       font-family:-apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif; }
-main { max-width:32rem; margin:0 auto; }
-</style>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mindollab</title>
+<meta name="description" content="Mindollab(민돌랩)은 손이 자꾸 가는 작은 앱을 만드는 스튜디오입니다. Readmon, Dejavu, Triple Tile Match, Ordo를 만들고 있습니다.">
+<meta name="theme-color" content="#f6f1e7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1a2130" media="(prefers-color-scheme: dark)">
+<link rel="canonical" href="https://mindollab.com/">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Mindollab">
+<meta property="og:title" content="Mindollab — 손이 자꾸 가는 작은 앱">
+<meta property="og:description" content="책을 귀로 듣는 리더, 혼잣말을 받아 주는 타임라인, 셋을 맞추는 타일 퍼즐.">
+<meta property="og:url" content="https://mindollab.com/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="assets/site.css">
+<script>
+  // 첫 페인트 전에 언어를 정한다: ?lang= > 저장값 > 브라우저 언어
+  (function () {
+    var l = null;
+    try { l = new URLSearchParams(location.search).get("lang") || localStorage.getItem("ml-lang"); } catch (e) {}
+    if (l !== "ko" && l !== "en") l = /^ko\b/i.test(navigator.language || "") ? "ko" : "en";
+    document.documentElement.lang = l;
+    document.documentElement.dataset.lang = l;
+  })();
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Mindollab",
+  "alternateName": "민돌랩",
+  "url": "https://mindollab.com/",
+  "logo": "https://mindollab.com/favicon.svg"
+}
+</script>
 </head>
-<body><main>
-<h1>fogblue</h1>
-<ul><li><a href="/readmon/">Readmon (리드몬)</a> — 책을 읽고 AI 목소리로 듣는 iOS 리더</li></ul>
-</main></body>
+<body>
+<a class="skip" href="#projects"><span data-l="ko">프로젝트로 건너뛰기</span><span data-l="en">Skip to projects</span></a>
+
+<header class="top">
+  <a class="brand" href="/" aria-label="Mindollab">
+    <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true">
+      <circle cx="10" cy="10" r="7" fill="var(--c-readmon)"/>
+      <rect x="23" y="3" width="14" height="14" rx="2" transform="rotate(45 30 10)" fill="var(--c-ordo)"/>
+      <path d="M10 23 L17.5 37 L2.5 37 Z" fill="var(--c-dejavu)" stroke="var(--c-dejavu)" stroke-width="1.5" stroke-linejoin="round"/>
+      <rect x="23.5" y="23.5" width="13" height="13" rx="3" fill="var(--c-tile)"/>
+    </svg>
+    <span class="brand-word">mindollab</span>
+  </a>
+  <nav class="nav" id="nav">
+    <a href="#projects"><span data-l="ko">프로젝트</span><span data-l="en">Projects</span></a>
+    <a href="#about"><span data-l="ko">소개</span><span data-l="en">About</span></a>
+    <a href="#contact"><span data-l="ko">연락</span><span data-l="en">Contact</span></a>
+    <button class="lang" type="button" id="lang-toggle">
+      <span data-l="ko" lang="en">EN</span><span data-l="en" lang="ko">KO</span>
+    </button>
+  </nav>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="hero-copy">
+      <p class="eyebrow"><span data-l="ko">민돌랩 · 작은 앱 스튜디오</span><span data-l="en">Mindollab · a small app studio</span></p>
+      <h1>
+        <span data-l="ko">손이 자꾸 가는<br>작은 앱을 만듭니다.</span>
+        <span data-l="en">Small apps<br>you keep reaching for.</span>
+      </h1>
+      <p class="lede">
+        <span data-l="ko">책을 귀로 듣는 리더, 혼잣말을 받아 주는 타임라인, 셋을 맞추는 타일 퍼즐. 매일 쓰는 도구와 잠깐의 놀이를 만들고, 오래 다듬습니다.</span>
+        <span data-l="en">A reader that lets you hear your books, a timeline for your stray thoughts, a puzzle about matching three. We make everyday tools and little games, then keep polishing them.</span>
+      </p>
+      <div class="cta">
+        <a class="btn btn-solid" href="#projects"><span data-l="ko">만들고 있는 것들</span><span data-l="en">See what we make</span> <span aria-hidden="true">↓</span></a>
+        <a class="btn btn-ghost" href="https://apps.apple.com/app/id6803438401"><span data-l="ko">리드몬 받기</span><span data-l="en">Get Readmon</span></a>
+      </div>
+    </div>
+
+    <section class="play" aria-labelledby="play-title">
+      <p class="play-title" id="play-title">
+        <span data-l="ko">같은 모양 셋을 맞춰 보세요</span><span data-l="en">Match three of a kind</span>
+      </p>
+      <div class="board" id="board" role="group"></div>
+      <div class="tray" id="tray" role="list"></div>
+      <div class="play-foot">
+        <p class="play-status" id="play-status" aria-live="polite"></p>
+        <button class="play-reset" type="button" id="play-reset">
+          <span data-l="ko">다시 섞기</span><span data-l="en">Shuffle</span>
+        </button>
+      </div>
+    </section>
+  </section>
+
+  <section class="projects" id="projects" aria-labelledby="projects-title">
+    <div class="section-head">
+      <h2 id="projects-title"><span data-l="ko">만들고 있는 것들</span><span data-l="en">What we're making</span></h2>
+      <p class="legend" aria-hidden="true">
+        <span><i class="sh sh-circle"></i>Readmon</span>
+        <span><i class="sh sh-triangle"></i>Dejavu</span>
+        <span><i class="sh sh-square"></i>Triple Tile</span>
+        <span><i class="sh sh-diamond"></i>Ordo</span>
+      </p>
+    </div>
+
+    <!-- Readmon: 유일하게 출시된 제품이라 한 줄을 통째로 쓴다 -->
+    <article class="proj proj-readmon" data-kind="readmon">
+      <div class="proj-deco" aria-hidden="true"></div>
+      <img class="proj-icon" src="assets/icons/readmon.png" width="132" height="132" alt="" loading="lazy">
+      <div class="proj-body">
+        <p class="status status-live"><span data-l="ko">출시 · iPhone · iPad</span><span data-l="en">Out now · iPhone · iPad</span></p>
+        <h3>Readmon <span class="alt" data-l="ko">리드몬</span></h3>
+        <p class="tagline"><span data-l="ko">눈으로 읽고 귀로 듣는 손안의 서재</span><span data-l="en">Read or hear the books you own</span></p>
+        <p class="desc">
+          <span data-l="ko">가지고 있는 EPUB·TXT·PDF·만화를 한 서재에 모으고, 읽던 문장에서 그대로 듣기로 넘어갑니다. 출퇴근길에도, 운전 중에도 책이 끊기지 않게.</span>
+          <span data-l="en">Gather your EPUB, TXT, PDF and comics in one library, and switch from reading to listening at the very sentence you stopped. Your book keeps going on the commute, too.</span>
+        </p>
+        <ul class="feats">
+          <li><span data-l="ko">읽던 자리에서 이어 듣기</span><span data-l="en">Listen from where you left off</span></li>
+          <li><span data-l="ko">내려받은 목소리는 인터넷 없이</span><span data-l="en">Downloaded voices work offline</span></li>
+          <li><span data-l="ko">대사와 내레이션을 다른 목소리로</span><span data-l="en">Different voices for dialogue and narration</span></li>
+          <li><span data-l="ko">화면 33개 언어</span><span data-l="en">Interface in 33 languages</span></li>
+        </ul>
+        <div class="links">
+          <a class="btn btn-cream" href="https://apps.apple.com/app/id6803438401">App Store</a>
+          <a class="btn btn-line" href="/readmon/"><span data-l="ko">리드몬 홈페이지</span><span data-l="en">Readmon home</span> <span aria-hidden="true">→</span></a>
+          <span class="soon"><span data-l="ko">Android 준비 중</span><span data-l="en">Android coming soon</span></span>
+        </div>
+      </div>
+    </article>
+
+    <div class="proj-pair">
+      <article class="proj proj-dejavu" data-kind="dejavu">
+        <div class="proj-deco" aria-hidden="true"></div>
+        <img class="proj-icon" src="assets/icons/dejavu.png" width="96" height="96" alt="" loading="lazy">
+        <p class="status status-dev"><span data-l="ko">개발 중 · iPhone · iPad</span><span data-l="en">In development · iPhone · iPad</span></p>
+        <h3>Dejavu <span class="alt" data-l="ko">기시감</span></h3>
+        <p class="tagline"><span data-l="ko">혼자 쓰는 타임라인</span><span data-l="en">A timeline just for you</span></p>
+        <p class="desc">
+          <span data-l="ko">쓸데없는 생각도, 한 줄짜리 감정도 짧게 던져 두세요. 잊을 즈음 지난 메모가 불쑥 다시 찾아옵니다. 계정도 팔로워도 없이.</span>
+          <span data-l="en">Toss in stray thoughts and one-line feelings. Just as you forget them, an old note drops by again. No account, no followers.</span>
+        </p>
+        <ul class="feats">
+          <li><span data-l="ko">열자마자 바로 쓰기</span><span data-l="en">Open and start typing</span></li>
+          <li><span data-l="ko">말로 남기기</span><span data-l="en">Leave it by voice</span></li>
+          <li><span data-l="ko">초성 검색 · 잠금</span><span data-l="en">Search · app lock</span></li>
+        </ul>
+      </article>
+
+      <article class="proj proj-tile" data-kind="tile">
+        <div class="proj-deco" aria-hidden="true"></div>
+        <img class="proj-icon" src="assets/icons/tripletile.png" width="96" height="96" alt="" loading="lazy">
+        <p class="status status-dev"><span data-l="ko">개발 중 · iOS · Android</span><span data-l="en">In development · iOS · Android</span></p>
+        <h3>Triple Tile Match <span class="alt"><span data-l="ko">가제</span><span data-l="en">working title</span></span></h3>
+        <p class="tagline"><span data-l="ko">셋을 맞춰 떠나는 세계 여행</span><span data-l="en">Match three, travel the world</span></p>
+        <p class="desc">
+          <span data-l="ko">같은 타일 셋을 맞춰 조각을 모으고, 나라마다 여행 앨범의 풍경을 채워 갑니다. 따뜻한 미니어처 풍경의 열한 나라가 기다려요.</span>
+          <span data-l="en">Match three tiles to collect pieces and fill a travel album, country by country. Eleven countries of warm miniature scenery are waiting.</span>
+        </p>
+        <ul class="feats">
+          <li><span data-l="ko">11개 나라 · 330판</span><span data-l="en">11 countries · 330 levels</span></li>
+          <li><span data-l="ko">엽서와 여행 앨범</span><span data-l="en">Postcards and a travel album</span></li>
+        </ul>
+      </article>
+    </div>
+
+    <article class="proj proj-ordo" data-kind="ordo">
+      <div class="ordo-mark" aria-hidden="true"><i class="sh sh-diamond"></i></div>
+      <div class="proj-body">
+        <p class="status status-inhouse"><span data-l="ko">사내에서 먼저 쓰는 중 · macOS · Windows</span><span data-l="en">Used in-house first · macOS · Windows</span></p>
+        <h3>Ordo</h3>
+        <p class="desc">
+          <span data-l="ko">온라인 판매자의 발주·재고·출고를 한 흐름으로 잇는 데스크톱 도구입니다. 인터넷이 끊겨도 멈추지 않고, 팀과는 알아서 맞춰집니다. 지금은 우리 팀이 매일 쓰며 다듬고 있어요.</span>
+          <span data-l="en">A desktop tool that ties ordering, stock and shipping into one flow for online sellers. It keeps working offline and syncs with your team. Right now our own team uses it every day while we refine it.</span>
+        </p>
+      </div>
+    </article>
+  </section>
+
+  <section class="about" id="about" aria-labelledby="about-title">
+    <h2 id="about-title"><span data-l="ko">민돌랩은</span><span data-l="en">How we work</span></h2>
+    <ol class="tenets">
+      <li>
+        <i class="sh sh-circle" aria-hidden="true"></i>
+        <h3><span data-l="ko">작게 시작해서 오래 다듬습니다</span><span data-l="en">Start small, polish for long</span></h3>
+        <p><span data-l="ko">기능을 늘리기보다 매일 쓰는 동작 하나를 더 매끄럽게 만드는 데 시간을 씁니다.</span><span data-l="en">We'd rather make one everyday gesture smoother than add another feature.</span></p>
+      </li>
+      <li>
+        <i class="sh sh-triangle" aria-hidden="true"></i>
+        <h3><span data-l="ko">할 수 있으면 기기 안에서</span><span data-l="en">On your device when we can</span></h3>
+        <p><span data-l="ko">목소리도, 메모도 가능하면 휴대폰 안에서 돌아가게 만듭니다. 기다림이 짧고 연결이 없어도 됩니다.</span><span data-l="en">Voices and notes run on your phone wherever possible — less waiting, no connection required.</span></p>
+      </li>
+      <li>
+        <i class="sh sh-square" aria-hidden="true"></i>
+        <h3><span data-l="ko">도구에도 놀이의 감각을</span><span data-l="en">A sense of play, even in tools</span></h3>
+        <p><span data-l="ko">쓰는 사람이 피식 웃는 순간이 있는 앱이 오래 남는다고 믿습니다. 위의 타일도 그래서 놓았어요.</span><span data-l="en">Apps that make you smile now and then are the ones that stay. That's why the tiles up top are there.</span></p>
+      </li>
+    </ol>
+  </section>
+
+  <section class="contact" id="contact" aria-labelledby="contact-title">
+    <h2 id="contact-title"><span data-l="ko">이야기 나눠요</span><span data-l="en">Say hello</span></h2>
+    <p><span data-l="ko">앱에 대한 의견, 버그 제보, 제휴 문의 모두 반갑습니다.</span><span data-l="en">Feedback, bug reports and partnership ideas are all welcome.</span></p>
+    <a class="mail" href="mailto:contact@mindollab.com">contact@mindollab.com</a>
+  </section>
+</main>
+
+<footer class="foot">
+  <p class="foot-brand">Mindollab <span data-l="ko">민돌랩</span></p>
+  <p class="foot-meta"><span data-l="ko">대표 이민행 · 사업자등록번호 381-06-03591</span><span data-l="en">Founder Minhaeng Lee · Business reg. no. 381-06-03591</span></p>
+  <p class="foot-links">
+    <a href="/readmon/privacy.html"><span data-l="ko">Readmon 개인정보처리방침</span><span data-l="en">Readmon Privacy Policy</span></a>
+    <a href="/readmon/terms.html"><span data-l="ko">Readmon 이용약관</span><span data-l="en">Readmon Terms</span></a>
+  </p>
+  <p class="foot-copy">© 2026 Mindollab</p>
+</footer>
+
+<script src="assets/site.js" defer></script>
+</body>
 </html>
